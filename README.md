@@ -1,25 +1,31 @@
 ## Start
 - Instalação
 ```bash
-    npm install
+  npm install
 ```
 
 - Comando para execultar as migrações e criar o Banco de Dados.
 ```bash
-    npm run knex -- migrate:latest
+  npm run knex -- migrate:latest
+```
+
+- Comando no Knex para criar uma nova tabela
+```bash
+  npm run knex -- migrate:make table_name
 ```
 
 - Comando para execultar a API
 ```bash
-    npm run dev
+  npm run dev
 ```
+
 ---
 
 # RF (Requisitos Funcionais)
 
 - [ ] Deve ser possível criar um usuário
 - [ ] Deve ser possível identificar o usuário entre as requisições
-- [ ] Deve ser possível registrar uma refeição feita, com as seguintes informações:
+- [x] Deve ser possível registrar uma refeição feita, com as seguintes informações:
   > *As refeições devem ser relacionadas a um usuário.*
   - Nome
   - Descrição
