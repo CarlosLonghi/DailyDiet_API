@@ -32,4 +32,17 @@ export async function mealsRoutes(app: FastifyInstance) {
 
     return reply.status(201).send()
   })
+
+  app.get('/:userId', async (request, reply) => {
+    const getMealsParamsSchema = z.object({
+      userId: z.string().uuid(),
+    })
+    const { userId } = getMealsParamsSchema.parse(request.params)
+
+    const meals = await knex('meals')
+      .where({ user_id: userId })
+      .select('name', 'description', 'diet_compliant', 'date', 'hour')
+
+    return reply.status(200).send({ meals })
+  })
 }
