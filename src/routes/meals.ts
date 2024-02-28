@@ -46,6 +46,7 @@ export async function mealsRoutes(app: FastifyInstance) {
     return reply.status(200).send({ meals })
   })
 
+  // View Role
   app.get('/view/:id', async (request, reply) => {
     const getMealByIdParamsSchema = z.object({
       id: z.string().uuid(),
@@ -55,5 +56,16 @@ export async function mealsRoutes(app: FastifyInstance) {
     const meals = await knex('meals').where({ id }).select()
 
     return reply.status(200).send({ meals })
+  })
+
+  app.delete('/view/:id', async (request, reply) => {
+    const getMealByIdParamsSchema = z.object({
+      id: z.string().uuid(),
+    })
+    const { id } = getMealByIdParamsSchema.parse(request.params)
+
+    await knex('meals').where({ id }).delete()
+
+    return reply.status(200).send()
   })
 }
