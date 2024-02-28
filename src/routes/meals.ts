@@ -46,6 +46,49 @@ export async function mealsRoutes(app: FastifyInstance) {
     return reply.status(200).send({ meals })
   })
 
+  app.get('/metric/:userId', async (request, reply) => {
+    const getMetricByUserIdParamsSchema = z.object({
+      userId: z.string().uuid(),
+    })
+    const { userId } = getMetricByUserIdParamsSchema.parse(request.params)
+
+    const allMeals = await knex('meals')
+      .where({ user_id: userId })
+      .orderBy('created_at')
+
+    const allMealsAmount = allMeals.length
+
+    const withinDietMealsAmount = (
+      await knex('meals')
+        .where({ user_id: userId })
+        .andWhere({ diet_compliant: 'yes' })
+    ).length
+
+    const offDietMealsAmount = (
+      await knex('meals')
+        .where({ user_id: userId })
+        .andWhere({ diet_compliant: 'no' })
+    ).length
+
+    let currentStreak = 0
+    let bestStreak = 0
+    for (const meal of allMeals) {
+      if (meal.diet_compliant === 'yes') {
+        currentStreak++
+        bestStreak = Math.max(bestStreak, currentStreak)
+      } else {
+        currentStreak = 0
+      }
+    }
+
+    return reply.status(200).send({
+      allMealsAmount,
+      withinDietMealsAmount,
+      offDietMealsAmount,
+      mealsBestDietStreak: bestStreak,
+    })
+  })
+
   // View Role
   app.get('/view/:id', async (request, reply) => {
     const getMealByIdParamsSchema = z.object({
@@ -96,6 +139,6 @@ export async function mealsRoutes(app: FastifyInstance) {
       diet_compliant,  // eslint-disable-line
     })
 
-    return reply.status(204).send()
+    return reply.status(200).send()
   })
 }
