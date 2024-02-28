@@ -41,7 +41,7 @@ export async function mealsRoutes(app: FastifyInstance) {
 
     const meals = await knex('meals')
       .where({ user_id: userId })
-      .select('name', 'description', 'diet_compliant', 'date', 'hour')
+      .select('id', 'name', 'description', 'diet_compliant', 'date', 'hour')
 
     return reply.status(200).send({ meals })
   })
@@ -67,5 +67,35 @@ export async function mealsRoutes(app: FastifyInstance) {
     await knex('meals').where({ id }).delete()
 
     return reply.status(200).send()
+  })
+
+  app.put('/view/:id', async (request, reply) => {
+    const getMealByIdParamsSchema = z.object({
+      id: z.string().uuid(),
+    })
+
+    const getMealBodyToUpdate = z.object({
+      name: z.string(),
+      description: z.string(),
+      date: z.string(),
+      hour: z.string(),
+      diet_compliant: z.enum(['yes', 'no']),
+    })
+
+    const { id } = getMealByIdParamsSchema.parse(request.params)
+
+    // eslint-disable-next-line
+    const { name, description, date, hour, diet_compliant } =
+      getMealBodyToUpdate.parse(request.body)
+
+    await knex('meals').where({ id }).update({
+      name,
+      description,
+      date,
+      hour,
+      diet_compliant,  // eslint-disable-line
+    })
+
+    return reply.status(204).send()
   })
 }
