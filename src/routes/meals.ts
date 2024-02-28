@@ -96,6 +96,14 @@ export async function mealsRoutes(app: FastifyInstance) {
     })
     const { id } = getMealByIdParamsSchema.parse(request.params)
 
+    const { userId } = request.cookies
+    const amountMealsToUpdate = (
+      await knex('meals').where({ id }).andWhere({ user_id: userId })
+    ).length
+    if (amountMealsToUpdate === 0) {
+      return reply.status(401).send()
+    }
+
     const meals = await knex('meals').where({ id }).select()
 
     return reply.status(200).send({ meals })
@@ -106,8 +114,17 @@ export async function mealsRoutes(app: FastifyInstance) {
       id: z.string().uuid(),
     })
     const { id } = getMealByIdParamsSchema.parse(request.params)
+    const { userId } = request.cookies
 
-    await knex('meals').where({ id }).delete()
+    const amountMealsToDelete = (
+      await knex('meals').where({ id }).andWhere({ user_id: userId })
+    ).length
+
+    await knex('meals').where({ id }).andWhere({ user_id: userId }).delete()
+
+    if (amountMealsToDelete === 0) {
+      return reply.status(401).send()
+    }
 
     return reply.status(200).send()
   })
@@ -130,6 +147,14 @@ export async function mealsRoutes(app: FastifyInstance) {
     // eslint-disable-next-line
     const { name, description, date, hour, diet_compliant } =
       getMealBodyToUpdate.parse(request.body)
+
+    const { userId } = request.cookies
+    const amountMealsToUpdate = (
+      await knex('meals').where({ id }).andWhere({ user_id: userId })
+    ).length
+    if (amountMealsToUpdate === 0) {
+      return reply.status(401).send()
+    }
 
     await knex('meals').where({ id }).update({
       name,
